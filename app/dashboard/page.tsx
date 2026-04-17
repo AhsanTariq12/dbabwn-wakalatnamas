@@ -5,6 +5,7 @@ import { Printer, FileText, TrendingUp, Loader2, Calendar, BarChart3, ChevronRig
 import Link from 'next/link'
 
 export default function DashboardPage() {
+
   const [stats, setStats] = useState({ totalForms: 0, totalRevenue: 0, batchesToday: 0, formsToday: 0 })
   const [batches, setBatches] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -50,7 +51,7 @@ export default function DashboardPage() {
           if (profile) setRole(profile.role)
         }
 
-        const { data: batchesData } = await supabase.from('batches').select('quantity, amount_paid, created_at, batch_code')
+        const { data: batchesData } = await supabase.from('batches').select('quantity, amount_paid, created_at, batch_code').eq('status', 'printed')
 
         if (batchesData) {
           const totalForms = batchesData.reduce((acc, b) => acc + b.quantity, 0)

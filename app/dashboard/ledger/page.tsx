@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { Search, Loader2, Calendar, User, FileDigit, RotateCcw } from 'lucide-react'
+import { Search, Loader2, Calendar, User, FileDigit, RotateCcw, Download } from 'lucide-react'
 import Link from 'next/link'
 
 export default function LedgerPage() {
@@ -10,23 +10,40 @@ export default function LedgerPage() {
   const [batches, setBatches] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [loadMoreLoading, setLoadMoreLoading] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
-
   // Filter States
   const [selectedDay, setSelectedDay] = useState('')
   const [selectedMonth, setSelectedMonth] = useState('')
   const [selectedYear, setSelectedYear] = useState('')
   const [availableYears, setAvailableYears] = useState<string[]>([])
   const [stats, setStats] = useState({ totalBatches: 0, totalForms: 0 })
-  
+
+
   const supabase = createClient()
+
+  // Helper to apply current filters to any Supabase query
+  const applyFilters = (req: any) => {
+    if (selectedDay) {
+      return req.gte('created_at', `${selectedDay}T00:00:00+05:00`).lte('created_at', `${selectedDay}T23:59:59+05:00`)
+    } else if (selectedMonth) {
+      const [year, month] = selectedMonth.split('-')
+      const firstDay = `${selectedMonth}-01T00:00:00+05:00`
+      const lastDayStr = new Date(parseInt(year), parseInt(month), 0).toISOString().split('T')[0]
+      const lastDay = `${lastDayStr}T23:59:59+05:00`
+      return req.gte('created_at', firstDay).lte('created_at', lastDay)
+    } else if (selectedYear && selectedYear !== 'all') {
+      return req.gte('created_at', `${selectedYear}-01-01T00:00:00+05:00`).lte('created_at', `${selectedYear}-12-31T23:59:59+05:00`)
+    }
+    return req
+  }
 
   // Fetch unique years for the filter
   useEffect(() => {
     async function fetchYears() {
-      const { data } = await supabase.from('batches').select('created_at')
+      const { data } = await supabase.from('batches').select('created_at').eq('status', 'printed')
       if (data) {
         const years = Array.from(new Set(data.map(b => new Date(b.created_at).getFullYear().toString()))).sort((a, b) => b.localeCompare(a))
         setAvailableYears(years)
@@ -66,6 +83,7 @@ export default function LedgerPage() {
         let request = supabase
           .from('batches')
           .select('*, wakalat_namas(serial_number)')
+          .eq('status', 'printed')
           .order('created_at', { ascending: false })
 
         if (matchedIds.length > 0) {
@@ -123,7 +141,7 @@ export default function LedgerPage() {
           setBatches(data || [])
           
           // Get total forms sum for date mode (only on reset to save requests)
-          let sumReq = supabase.from('batches').select('quantity')
+          let sumReq = supabase.from('batches').select('quantity').eq('status', 'printed')
           sumReq = applyFilters(sumReq)
           const { data: sumData } = await sumReq
           const totalForms = sumData?.reduce((acc: number, b: any) => acc + (b.quantity || 0), 0) || 0
@@ -140,6 +158,63 @@ export default function LedgerPage() {
     } finally {
       setLoading(false)
       setLoadMoreLoading(false)
+    }
+  }
+
+  async function handleExportCSV() {
+    try {
+      setIsExporting(true)
+      let allData: any[] = []
+
+      // Re-run the filter logic without pagination to get FULL data
+      if (search) {
+        const { data: serialMatches } = await supabase.from('wakalat_namas').select('batch_id').ilike('serial_number', `%${search}`)
+        const matchedIds = Array.from(new Set(serialMatches?.map(s => s.batch_id) || []))
+        let request = supabase.from('batches').select('*, wakalat_namas(serial_number)').eq('status', 'printed').order('created_at', { ascending: false })
+        if (matchedIds.length > 0) request = request.or(`batch_code.ilike.%${search}%,id.in.(${matchedIds.join(',')})`)
+        else request = request.ilike('batch_code', `%${search}%`)
+        const { data } = await request
+        allData = data || []
+      } else {
+        let request = supabase.from('batches').select('*, wakalat_namas(serial_number)').eq('status', 'printed').order('created_at', { ascending: false })
+        request = applyFilters(request)
+        const { data } = await request
+        allData = data || []
+      }
+
+      if (allData.length === 0) {
+        alert('No data to export.')
+        return
+      }
+
+      // Build CSV
+      const headers = ['Date', 'Time', 'Batch Code', 'Quantity', 'Amount Paid (Rs)', 'Printer Name', 'Serial Start', 'Serial End']
+      const rows = allData.map(b => [
+        new Date(b.created_at).toLocaleDateString(),
+        new Date(b.created_at).toLocaleTimeString(),
+        b.batch_code,
+        b.quantity,
+        b.amount_paid,
+        b.printer_name || 'Unknown',
+        b.serial_start,
+        b.serial_end
+      ])
+
+      const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n')
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `wakalat_nama_audit_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+    } catch (err) {
+      console.error('Export failed:', err)
+    } finally {
+      setIsExporting(false)
     }
   }
 
@@ -248,6 +323,20 @@ export default function LedgerPage() {
           >
             <RotateCcw size={14} />
             Reset
+          </button>
+
+          <button
+            onClick={handleExportCSV}
+            disabled={isExporting || batches.length === 0}
+            className="h-10 px-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-all flex items-center gap-2 text-xs font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed ml-auto xl:ml-0"
+            title="Export filtered data to CSV"
+          >
+            {isExporting ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <Download size={14} />
+            )}
+            {isExporting ? 'Exporting...' : 'Export CSV'}
           </button>
         </div>
       </div>

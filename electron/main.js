@@ -4,9 +4,13 @@ const path = require('path');
 let mainWindow;
 
 function getStartUrl() {
-  return process.env.NODE_ENV === 'development'
-    ? 'http://localhost:3000'
-    : 'https://dbabwn-wakalatnamas.vercel.app'; // Replace with your actual Vercel URL later
+  // On Windows, `NODE_ENV` often isn't set for the Electron process when started via npm scripts.
+  // `app.isPackaged` is a reliable way to detect dev vs production for Electron.
+  if (!app.isPackaged) {
+    return process.env.ELECTRON_START_URL || 'http://localhost:3000';
+  }
+
+  return 'https://dbabwn-wakalatnamas.vercel.app'; // Replace with your actual production URL
 }
 
 function createWindow() {
@@ -21,13 +25,26 @@ function createWindow() {
     title: "DBABWN WakalatNamas",
     autoHideMenuBar: true,
   });
-
+  console.log("[main] window created");
   // Hide the default Electron menu (eliminates "Create Next App" or "Electron" menu items)
   const { Menu } = require('electron');
   Menu.setApplicationMenu(null);
 
   const startUrl = getStartUrl();
   mainWindow.loadURL(startUrl);
+
+  // if (!app.isPackaged) {
+  //   // Auto-open DevTools in dev
+  //   mainWindow.webContents.openDevTools({ mode: 'detach' });
+
+  //   // Optional: pipe renderer console.* to this terminal
+  //   mainWindow.webContents.on('console-message', (e) => {
+  //     const message = e?.message ?? '';
+  //     const sourceId = e?.sourceId ?? '';
+  //     const lineNumber = e?.lineNumber ?? '';
+  //     console.log(`[renderer] ${message} (${sourceId}:${lineNumber})`);
+  //   });
+  // }
 
   // Set a custom User Agent so the server can identify the desktop app
   mainWindow.webContents.setUserAgent(mainWindow.webContents.getUserAgent() + " WakalatDesktop");
@@ -44,7 +61,7 @@ ipcMain.handle('get-printers', async () => {
 });
 
 ipcMain.handle('print-silent', async (event, { url, deviceName }) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     // Create a hidden window for the actual print job
     let printWindow = new BrowserWindow({
       show: false,
@@ -67,10 +84,18 @@ ipcMain.handle('print-silent', async (event, { url, deviceName }) => {
           if (success) {
             resolve({ success: true });
           } else {
-            reject({ success: false, error: errorType });
+            // Resolve (NOT reject) with failure — so the JS catch block is not triggered
+            // and the rollback logic in PrintView.tsx can run properly
+            resolve({ success: false, error: errorType });
           }
         });
       }, 500);
+    });
+
+    // Safety net: if window fails to load, resolve with failure
+    printWindow.webContents.on('did-fail-load', () => {
+      printWindow.close();
+      resolve({ success: false, error: 'Failed to load print template' });
     });
   });
 });

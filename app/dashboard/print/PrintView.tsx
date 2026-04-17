@@ -4,6 +4,7 @@ import PrintPasswordModal from '@/components/PrintPasswordModal'
 import { useEffect, useState } from 'react'
 
 export default function PrintView() {
+  console.log("HELLO1")
   const [quantity, setQuantity] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -34,7 +35,7 @@ export default function PrintView() {
 
       // Filter out virtual printers (PDF, XPS, OneNote, etc.)
       const filtered = printerList.filter((p: any) => {
-        return ['HP LaserJet Pro M404n', 'Canon LBP6030']
+        // return ['HP LaserJet Pro M404n', 'Canon LBP6030']
         const name = p.name.toLowerCase()
         const virtualKeywords = ['pdf', 'xps', 'onenote', 'fax', 'microsoft print', 'send to', 'save as']
         return !virtualKeywords.some(keyword => name.includes(keyword))
@@ -71,44 +72,71 @@ export default function PrintView() {
     setShowPasswordModal(true)
   }
 
-  async function executePrint() {
+  async function executePrint(password: string) {
     setShowPasswordModal(false)
     setLoading(true)
     setError('')
     setSuccess('')
 
     try {
-      // 1. Record the batch in Supabase
-      const response = await fetch('/api/print-batch', {
+      // STEP 1: Verify identity & reserve a pending batch (so template can load)
+      const prepareRes = await fetch('/api/print-batch/prepare', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          quantity: quantity,
+          quantity,
           amount_paid: amountPaid,
-          printer: selectedPrinter
+          printer: selectedPrinter,
+          password,
         })
       })
 
-      if (!response.ok) {
-        const errData = await response.json()
-        throw new Error(errData.error || 'Failed to record batch in database')
+      if (!prepareRes.ok) {
+        const err = await prepareRes.json()
+        throw new Error(err.error || 'Verification failed')
       }
 
-      const data = await response.json()
+      const prepData = await prepareRes.json()
 
-      // 2. Trigger Silent Print via Electron Bridge
-      const templatePath = `/print/template?bcode=${data.bcode}`
+      // STEP 2: Send to physical printer (batch exists in DB as pending)
+      const templatePath = `/print/template?bcode=${prepData.batchCode}`
       const printResult = await window.electronAPI.printSilently({
         url: templatePath,
         deviceName: selectedPrinter
       })
+      console.log('[PrintView] printResult:', JSON.stringify(printResult))
 
-      if (printResult.success) {
-        setSuccess(`Successfully printed Batch ${data.bcode}. Check your printer.`)
-        setQuantity(1)
-      } else {
-        throw new Error(printResult.error || 'Print job failed at the system level.')
+      if (!printResult.success) {
+        // Print was canceled or failed — rollback reservation
+        await fetch('/api/print-batch/confirm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ batchId: prepData.batchId, action: 'rollback' })
+        })
+        throw new Error(printResult.error === 'Print job canceled'
+          ? 'Print was canceled. Reservation rolled back.'
+          : (printResult.error || 'Print failed at printer level. Reservation rolled back.')
+        )
       }
+
+      // STEP 3: Print was successful — finalize the pending reservation
+      const confirmRes = await fetch('/api/print-batch/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          batchId: prepData.batchId,
+          action: 'confirm'
+        })
+      })
+
+      if (!confirmRes.ok) {
+        const errData = await confirmRes.json()
+        setSuccess(`⚠️ Printed ${prepData.batchCode} but finalize failed: ${errData.error}. Please note this batch manually.`)
+        return
+      }
+
+      setSuccess(`Successfully printed Batch ${prepData.batchCode}. Check your printer.`)
+      setQuantity(1)
 
     } catch (err: any) {
       setError(err.message)
@@ -238,7 +266,7 @@ export default function PrintView() {
               {loading ? (
                 <div className="flex items-center space-x-2">
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Processing Printing...</span>
+                  <span>{success ? 'Batch Verified!' : 'Synchronizing Ledger...'}</span>
                 </div>
               ) : (
                 <>
@@ -256,7 +284,7 @@ export default function PrintView() {
 
       {showPasswordModal && (
         <PrintPasswordModal
-          onSuccess={executePrint}
+          onSuccess={(pw) => executePrint(pw)}
           onCancel={() => setShowPasswordModal(false)}
         />
       )}

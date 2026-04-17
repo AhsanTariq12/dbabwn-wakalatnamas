@@ -5,7 +5,7 @@ import { ShieldCheck, Lock, X } from 'lucide-react'
 import { verifyPasswordAction } from '@/app/actions/auth'
 
 interface PrintPasswordModalProps {
-  onSuccess: () => void
+  onSuccess: (password: string) => void
   onCancel: () => void
 }
 
@@ -22,7 +22,7 @@ export default function PrintPasswordModal({ onSuccess, onCancel }: PrintPasswor
     try {
       const result = await verifyPasswordAction(password)
       if (result.success) {
-        onSuccess()
+        onSuccess(password)
       } else {
         setError(result.error || 'Identity verification failed.')
       }

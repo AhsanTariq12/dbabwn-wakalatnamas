@@ -191,11 +191,11 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
                     </div>
 
                     <div className="flex items-end text-lg mb-4">
-                      <div className="flex-[3] flex items-end">
+                      <div className="flex-[2] flex items-end">
                         <div className="font-bold whitespace-nowrap text-xl">مدعی</div>
                         <div className="flex-1 border-b-[2px] border-black mr-4 h-8"></div>
                       </div>
-                      <div className="flex-[1] flex items-end">
+                      <div className="flex-[2] flex items-end">
                         <div className="font-bold whitespace-nowrap text-xl mr-6">مدعا علیہ</div>
                         <div className="flex-1 border-b-[2px] border-black mr-2 ml-2 h-8"></div>
                       </div>
@@ -228,8 +228,12 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
                     </div>
 
                     <div className="flex items-end text-lg mb-4 w-full">
-                      <div className="flex-1 border-b-[2px] border-black mr-4 h-8"></div>
-                      <div className="w-[45%] flex items-end">
+                     
+                      <div className="flex-[1.5] flex items-end">
+                        <div className="font-bold text-2xl whitespace-nowrap">مقدمہ نمبر</div>
+                        <div className="flex-1 border-b-[2px] border-black mr-4 h-8"></div>
+                      </div>
+                      <div className="flex-[2.5] flex items-end">
                         <div className="font-bold text-2xl whitespace-nowrap">جرم</div>
                         <div className="flex-1 border-b-[2px] border-black mr-4 h-8"></div>
                       </div>
