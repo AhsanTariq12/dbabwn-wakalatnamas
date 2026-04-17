@@ -34,7 +34,7 @@ export default function PrintView() {
 
       // Filter out virtual printers (PDF, XPS, OneNote, etc.)
       const filtered = printerList.filter((p: any) => {
-
+        return ['HP LaserJet Pro M404n', 'Canon LBP6030']
         const name = p.name.toLowerCase()
         const virtualKeywords = ['pdf', 'xps', 'onenote', 'fax', 'microsoft print', 'send to', 'save as']
         return !virtualKeywords.some(keyword => name.includes(keyword))
