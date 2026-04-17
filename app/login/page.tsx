@@ -1,6 +1,10 @@
 import { login } from './actions'
+import LoginSubmitButton from './LoginSubmitButton'
 
-export default function LoginPage() {
+export default async function LoginPage(props: { searchParams: Promise<{ error?: string }> }) {
+  const searchParams = await props.searchParams
+  const error = searchParams?.error
+
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0A0A0B]">
       {/* Dynamic Background Elements */}
@@ -25,6 +29,11 @@ export default function LoginPage() {
           </div>
 
           <form className="space-y-6 relative">
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/40 text-red-400 px-4 py-3 rounded-xl text-sm">
+                {error}
+              </div>
+            )}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-300 ml-1" htmlFor="email">
                 Email
@@ -53,12 +62,7 @@ export default function LoginPage() {
               />
             </div>
 
-            <button
-              formAction={login}
-              className="w-full h-12 font-medium rounded-xl text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-black transition-all shadow-lg active:scale-[0.98]"
-            >
-              Sign In
-            </button>
+            <LoginSubmitButton action={login} />
           </form>
 
           <div className="mt-8 pt-6 border-t border-white/5 text-center relative">

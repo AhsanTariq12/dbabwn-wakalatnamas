@@ -15,9 +15,9 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data)
 
   if (error) {
-    // Handling error visually requires client-side state or url params.
-    // For now, redirecting with error param to be processed by page (can be enhanced later)
-    redirect('/login?error=Invalid login credentials')
+    // Supabase typically returns a generic auth error for invalid credentials.
+    // Show a user-friendly message without leaking which field is wrong.
+    redirect('/login?error=Password%20is%20wrong%20or%20email%20not%20found')
   }
 
   revalidatePath('/', 'layout')
