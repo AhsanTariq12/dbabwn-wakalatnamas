@@ -35,13 +35,24 @@ export default function DesktopRequiredPage() {
             <span>Download DBABWN WakalatNamas for Windows</span>
           </a>
 
-          <Link
-            href="/dashboard"
-            className="flex items-center justify-center gap-2 h-14 text-gray-500 hover:text-white transition-colors text-sm font-medium"
-          >
-            <ArrowLeft size={16} />
-            Back to Viewer Dashboard
-          </Link>
+          <div className="flex flex-col items-center gap-2">
+            <Link
+              href="/dashboard"
+              className="flex items-center justify-center gap-2 h-14 text-gray-500 hover:text-white transition-colors text-sm font-medium"
+            >
+              <ArrowLeft size={16} />
+              Back to Viewer Dashboard
+            </Link>
+
+            <form action="/auth/signout" method="post" className="w-full max-w-[200px]">
+              <button 
+                type="submit"
+                className="flex items-center justify-center gap-2 w-full h-12 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all text-xs font-bold uppercase tracking-widest"
+              >
+                Sign Out
+              </button>
+            </form>
+          </div>
         </div>
 
         {/* Feature Highlights */}

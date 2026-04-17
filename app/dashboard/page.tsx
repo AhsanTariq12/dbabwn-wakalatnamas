@@ -10,23 +10,29 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [role, setRole] = useState<string>('viewer')
 
-  // Helper to get YYYY-MM-DD in local time
+  // Helpers to ensure Pakistan Time (+05:00) consistency
+  const PAKISTAN_OFFSET = 5 * 60 * 60 * 1000;
+
   const getLocalDateString = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    // Force to Pakistan time for date calculation
+    const pakDate = new Date(date.getTime() + PAKISTAN_OFFSET);
+    return pakDate.toISOString().split('T')[0];
   };
 
   const getLocalMonthString = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    return `${year}-${month}`;
+    const pakDate = new Date(date.getTime() + PAKISTAN_OFFSET);
+    return pakDate.toISOString().slice(0, 7); // YYYY-MM
+  };
+
+  const getLocalYearString = (date: Date) => {
+    const pakDate = new Date(date.getTime() + PAKISTAN_OFFSET);
+    return pakDate.getUTCFullYear().toString(); // Use UTC because we added the offset
   };
 
   // Filter States - Default to local "Today"
   const [selectedDay, setSelectedDay] = useState(getLocalDateString(new Date()))
   const [selectedMonth, setSelectedMonth] = useState(getLocalMonthString(new Date()))
+  const [selectedYear, setSelectedYear] = useState(getLocalYearString(new Date()))
 
   const supabase = createClient()
 
@@ -52,7 +58,7 @@ export default function DashboardPage() {
 
           const todayStr = getLocalDateString(new Date())
           const todayBatches = batchesData.filter(b => getLocalDateString(new Date(b.created_at)) === todayStr)
-          
+
           const batchesToday = todayBatches.length
           const formsToday = todayBatches.reduce((acc, b) => acc + b.quantity, 0)
 
@@ -79,6 +85,22 @@ export default function DashboardPage() {
       .filter(b => getLocalMonthString(new Date(b.created_at)) === selectedMonth)
       .reduce((acc, b) => acc + (b.amount_paid || 0), 0)
   }, [batches, selectedMonth])
+
+  const filteredYearIncome = useMemo(() => {
+    return batches
+      .filter(b => {
+        if (selectedYear === 'all') return true;
+        return getLocalYearString(new Date(b.created_at)) === selectedYear;
+      })
+      .reduce((acc, b) => acc + (b.amount_paid || 0), 0)
+  }, [batches, selectedYear])
+
+  const availableYears = useMemo(() => {
+    const years = new Set(batches.map(b => getLocalYearString(new Date(b.created_at))));
+    // Ensure current year is always an option even if no batches yet
+    years.add(getLocalYearString(new Date()));
+    return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
+  }, [batches])
 
   const recentBatches = useMemo(() => {
     return [...batches].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 3)
@@ -123,6 +145,20 @@ export default function DashboardPage() {
                 className="h-10 pl-14 pr-4 rounded-xl bg-white/[0.03] border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all text-sm font-medium"
               />
             </div>
+
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-indigo-500 uppercase tracking-wider pointer-events-none">Year</span>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="h-10 pl-12 pr-8 rounded-xl bg-white/[0.03] border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-sm font-medium appearance-none cursor-pointer"
+              >
+                {availableYears.map(year => (
+                  <option key={year} value={year} className="bg-[#0A0A0B]">{year}</option>
+                ))}
+                <option value="all" className="bg-[#0A0A0B]">All Time</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -149,12 +185,15 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="p-5 rounded-xl bg-white/[0.02] border border-white/5 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest relative z-10 mb-1">All-Time Revenue</p>
-          <p className="text-xl font-bold text-white relative z-10">Rs {loading ? '...' : stats.totalRevenue.toLocaleString()}</p>
-          <div className="mt-3 p-1 rounded bg-indigo-500/20 text-indigo-400 w-fit">
-            <TrendingUp size={12} />
+        {/* Filtered Year Income */}
+        <div className="p-5 rounded-xl bg-indigo-600/5 border border-indigo-500/20 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent transition-opacity" />
+          <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest relative z-10 mb-1">
+            {selectedYear === 'all' ? 'Income (All Time)' : `Income (Year ${selectedYear})`}
+          </p>
+          <p className="text-xl font-bold text-white relative z-10">Rs {loading ? '...' : filteredYearIncome.toLocaleString()}</p>
+          <div className="mt-3 flex items-center text-[9px] text-gray-500 relative z-10 bg-black/20 w-fit px-1.5 py-0.5 rounded">
+            {selectedYear === 'all' ? 'Cumulative' : selectedYear}
           </div>
         </div>
 
@@ -220,10 +259,10 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
+        {role !== 'viewer' && (
+          <div className="space-y-6">
+            <h2 className="text-xl font-semibold text-white">Management</h2>
 
-        <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-white">Management</h2>
-          {role !== 'viewer' && (
             <Link
               href="/dashboard/print"
               className="block p-6 rounded-2xl bg-gradient-to-br from-blue-600/10 to-indigo-600/10 border border-white/5 hover:border-blue-500/40 transition-all group"
@@ -238,15 +277,18 @@ export default function DashboardPage() {
                 </div>
               </div>
             </Link>
-          )}
 
-          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
-            <div className="flex items-center gap-2 mb-4 text-xs font-bold text-gray-500 uppercase tracking-widest">
-              <Shield size={14} /> Total System Load
+
+
+            <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+              <div className="flex items-center gap-2 mb-4 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                <Shield size={14} /> Total System Load
+              </div>
+              <p className="text-sm text-gray-400">Today you have handled <span className="text-white font-bold">{stats.batchesToday}</span> batches.</p>
             </div>
-            <p className="text-sm text-gray-400">Today you have handled <span className="text-white font-bold">{stats.batchesToday}</span> batches.</p>
+
           </div>
-        </div>
+        )}
       </div>
     </div>
   )

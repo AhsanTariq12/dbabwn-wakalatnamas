@@ -35,10 +35,10 @@ export default async function DashboardLayout({
 
   // PLATFORM GUARD: Admins and SuperAdmins MUST use the desktop app for management/printing.
   // Viewers can use the web browser freely.
-  const isManagementRole = role === 'admin' || role === 'super_admin'
-  if (isManagementRole && !isDesktop) {
-    return <DesktopRequiredPage />
-  }
+  // const isManagementRole = role === 'admin' || role === 'super_admin'
+  // if (isManagementRole && !isDesktop) {
+  //   return <DesktopRequiredPage />
+  // }
 
   return (
     <div className="min-h-screen bg-[#0A0A0B] text-white flex overflow-hidden">

@@ -1,6 +1,7 @@
-"use client"
-import { useState, useEffect } from 'react'
+'use client'
 import { Printer, ShieldAlert, CheckCircle2, AlertCircle } from 'lucide-react'
+import PrintPasswordModal from '@/components/PrintPasswordModal'
+import { useEffect, useState } from 'react'
 
 export default function PrintView() {
   const [quantity, setQuantity] = useState(1)
@@ -12,6 +13,9 @@ export default function PrintView() {
   const [isDesktop, setIsDesktop] = useState(false)
   const [printers, setPrinters] = useState<any[]>([])
   const [selectedPrinter, setSelectedPrinter] = useState('')
+
+  // Security State
+  const [showPasswordModal, setShowPasswordModal] = useState(false)
 
   const WAKALAT_PRICE = 100 // Rs 100 per Wakalat Nama
   const amountPaid = quantity * WAKALAT_PRICE
@@ -27,16 +31,17 @@ export default function PrintView() {
   async function fetchPrinters() {
     try {
       const printerList = await window.electronAPI.getPrinters()
-      
+
       // Filter out virtual printers (PDF, XPS, OneNote, etc.)
       const filtered = printerList.filter((p: any) => {
+
         const name = p.name.toLowerCase()
         const virtualKeywords = ['pdf', 'xps', 'onenote', 'fax', 'microsoft print', 'send to', 'save as']
         return !virtualKeywords.some(keyword => name.includes(keyword))
       })
 
       setPrinters(filtered)
-      
+
       // Auto-select default printer if it's in the filtered list
       const defaultPrinter = filtered.find((p: any) => p.isDefault)
       if (defaultPrinter) {
@@ -49,7 +54,7 @@ export default function PrintView() {
     }
   }
 
-  async function handlePrint(e: React.FormEvent) {
+  function initiatePrint(e: React.FormEvent) {
     e.preventDefault()
 
     if (!isDesktop) {
@@ -62,6 +67,12 @@ export default function PrintView() {
       return
     }
 
+    // Open verification modal
+    setShowPasswordModal(true)
+  }
+
+  async function executePrint() {
+    setShowPasswordModal(false)
     setLoading(true)
     setError('')
     setSuccess('')
@@ -73,7 +84,8 @@ export default function PrintView() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           quantity: quantity,
-          amount_paid: amountPaid
+          amount_paid: amountPaid,
+          printer: selectedPrinter
         })
       })
 
@@ -147,7 +159,7 @@ export default function PrintView() {
           </div>
         )}
 
-        <form onSubmit={handlePrint} className="space-y-6">
+        <form onSubmit={initiatePrint} className="space-y-6">
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
@@ -241,6 +253,13 @@ export default function PrintView() {
           </div>
         </form>
       </div>
+
+      {showPasswordModal && (
+        <PrintPasswordModal
+          onSuccess={executePrint}
+          onCancel={() => setShowPasswordModal(false)}
+        />
+      )}
     </div>
   )
 }

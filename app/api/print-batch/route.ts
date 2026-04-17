@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json()
-    const { quantity, amount_paid } = body
+    const { quantity, amount_paid, printer } = body
 
     if (!quantity || !amount_paid) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -52,8 +52,8 @@ export async function POST(req: Request) {
         quantity,
         serial_start: serialStart,
         serial_end: serialEnd,
-        printed_by: user.id
-        // wakalat_type: logic removed as it's unified now
+        printed_by: user.id,
+        printer_name: printer || 'Unknown'
       })
       .select('id')
       .single()
