@@ -47,7 +47,7 @@ export default async function DashboardLayout({
         <div>
           <div className="h-16 flex items-center px-6 border-b border-white/5">
             <span className="text-lg font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              DBA Bahawalnagar Wakalat Nama System
+              DBABWN WakalatNamas
             </span>
           </div>
           <SidebarNav role={role} />
@@ -80,7 +80,7 @@ export default async function DashboardLayout({
         <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-900/10 blur-[150px] mix-blend-screen pointer-events-none" />
 
         <header className="h-16 border-b border-white/5 flex items-center justify-between px-8 md:hidden">
-          <span className="text-lg font-bold text-white">Wakalat System</span>
+          <span className="text-lg font-bold text-white">DBABWN WakalatNamas</span>
           <form action="/auth/signout" method="post">
             <button className="text-gray-400 hover:text-white">
               <LogOut size={20} />

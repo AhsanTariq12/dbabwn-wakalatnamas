@@ -32,7 +32,7 @@ export default function DesktopRequiredPage() {
             className="group relative flex items-center justify-center gap-3 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-2xl transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] active:scale-95"
           >
             <Download size={24} />
-            <span>Download Wakalat System for Windows</span>
+            <span>Download DBABWN WakalatNamas for Windows</span>
           </a>
 
           <Link

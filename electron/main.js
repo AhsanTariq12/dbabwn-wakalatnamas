@@ -3,6 +3,12 @@ const path = require('path');
 
 let mainWindow;
 
+function getStartUrl() {
+  return process.env.NODE_ENV === 'development'
+    ? 'http://localhost:3000'
+    : 'https://dbabwn-wakalatnamas.vercel.app'; // Replace with your actual Vercel URL later
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -12,16 +18,15 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
     },
-    title: "Wakalat Management System",
+    title: "DBABWN WakalatNamas",
     autoHideMenuBar: true,
   });
 
-  // In development, load from localhost. In production, we'll load from the Vercel URL
-  // (You can also build static files, but loading from Vercel allows instant updates)
-  const startUrl = process.env.NODE_ENV === 'development'
-    ? 'http://localhost:3000'
-    : 'https://dbabwn-wakalatnamas.vercel.app'; // Replace with your actual Vercel URL later
+  // Hide the default Electron menu (eliminates "Create Next App" or "Electron" menu items)
+  const { Menu } = require('electron');
+  Menu.setApplicationMenu(null);
 
+  const startUrl = getStartUrl();
   mainWindow.loadURL(startUrl);
 
   // Set a custom User Agent so the server can identify the desktop app
@@ -48,7 +53,7 @@ ipcMain.handle('print-silent', async (event, { url, deviceName }) => {
       }
     });
 
-    printWindow.loadURL(startUrl + url);
+    printWindow.loadURL(getStartUrl() + url);
 
     printWindow.webContents.on('did-finish-load', () => {
       // Small timeout to ensure styles (Tailwind/CSS) are fully applied

@@ -37,12 +37,13 @@
   "main": "electron/main.js",
   "build": {
     "appId": "com.dbabwn.wakalatnamas",
-    "productName": "Wakalat Nama System",
+    "productName": "DBABWN WakalatNamas",
     "directories": {
       "output": "dist"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "public/logo.png"
     }
   }
 }

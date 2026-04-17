@@ -27,13 +27,22 @@ export default function PrintView() {
   async function fetchPrinters() {
     try {
       const printerList = await window.electronAPI.getPrinters()
-      setPrinters(printerList)
-      // Auto-select default printer if available
-      const defaultPrinter = printerList.find((p: any) => p.isDefault)
+      
+      // Filter out virtual printers (PDF, XPS, OneNote, etc.)
+      const filtered = printerList.filter((p: any) => {
+        const name = p.name.toLowerCase()
+        const virtualKeywords = ['pdf', 'xps', 'onenote', 'fax', 'microsoft print', 'send to', 'save as']
+        return !virtualKeywords.some(keyword => name.includes(keyword))
+      })
+
+      setPrinters(filtered)
+      
+      // Auto-select default printer if it's in the filtered list
+      const defaultPrinter = filtered.find((p: any) => p.isDefault)
       if (defaultPrinter) {
         setSelectedPrinter(defaultPrinter.name)
-      } else if (printerList.length > 0) {
-        setSelectedPrinter(printerList[0].name)
+      } else if (filtered.length > 0) {
+        setSelectedPrinter(filtered[0].name)
       }
     } catch (err) {
       console.error('Failed to fetch printers:', err)
@@ -217,12 +226,12 @@ export default function PrintView() {
               {loading ? (
                 <div className="flex items-center space-x-2">
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Processing Silent Print...</span>
+                  <span>Processing Printing...</span>
                 </div>
               ) : (
                 <>
                   <Printer size={20} />
-                  <span>Execute Silent Print</span>
+                  <span>Execute Printing</span>
                 </>
               )}
             </button>

@@ -16,8 +16,8 @@ export default function LoginPage() {
           <div className="absolute inset-0 opacity-[0.015] pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
 
           <div className="text-center mb-8 relative">
-            <h1 className="text-2xl font-semibold tracking-tight text-white mb-2">
-              Wakalat Nama System
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">
+              DBABWN WakalatNamas
             </h1>
             <p className="text-sm text-gray-400">
               District Bar Association Bahawalnagar
