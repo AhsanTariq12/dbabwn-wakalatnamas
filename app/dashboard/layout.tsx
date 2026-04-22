@@ -4,6 +4,7 @@ import { LogOut } from 'lucide-react'
 import DesktopRequiredPage from './desktop-required/page'
 import { createAdminClient, createClient } from '@/utils/supabase/server'
 import SidebarNav from './SidebarNav'
+import MobileNav from '@/components/MobileNav'
 
 export default async function DashboardLayout({
   children,
@@ -41,8 +42,11 @@ export default async function DashboardLayout({
   // }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] text-white flex overflow-hidden">
-      {/* Sidebar */}
+    <div className="min-h-screen bg-[#0A0A0B] text-white flex flex-col md:flex-row overflow-x-hidden">
+      {/* Mobile Nav Header & Drawer */}
+      <MobileNav role={role} name={name} />
+
+      {/* Sidebar for Desktop */}
       <div className="w-64 border-r border-white/5 bg-black/20 backdrop-blur-md flex flex-col justify-between hidden md:flex">
         <div>
           <div className="h-16 flex items-center px-6 border-b border-white/5">
@@ -79,16 +83,7 @@ export default async function DashboardLayout({
         {/* Dynamic Background Elements */}
         <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-900/10 blur-[150px] mix-blend-screen pointer-events-none" />
 
-        <header className="h-16 border-b border-white/5 flex items-center justify-between px-8 md:hidden">
-          <span className="text-lg font-bold text-white">DBABWN WakalatNamas</span>
-          <form action="/auth/signout" method="post">
-            <button className="text-gray-400 hover:text-white">
-              <LogOut size={20} />
-            </button>
-          </form>
-        </header>
-
-        <main className="p-8 max-w-6xl mx-auto relative z-10">
+        <main className="p-4 md:p-8 max-w-6xl mx-auto relative z-10 font-[family-name:var(--font-geist-sans)]">
           {children}
         </main>
       </div>

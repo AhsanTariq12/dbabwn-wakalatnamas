@@ -18,7 +18,7 @@ export default function Watermark({
         {items.map((_, i) => (
           <span
             key={i}
-            className="text-4xl sm:text-5xl font-black text-black opacity-[0.05] w-1/4 p-12 text-center select-none uppercase tracking-widest whitespace-nowrap"
+            className="text-4xl sm:text-5xl font-black text-black opacity-[0.075] w-1/4 p-12 text-center select-none uppercase tracking-widest whitespace-nowrap"
           >
             {text}
           </span>

@@ -4,7 +4,7 @@ import PrintPasswordModal from '@/components/PrintPasswordModal'
 import { useEffect, useState } from 'react'
 
 export default function PrintView() {
-  console.log("HELLO1")
+
   const [quantity, setQuantity] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -12,6 +12,7 @@ export default function PrintView() {
 
   // Desktop-specific state
   const [isDesktop, setIsDesktop] = useState(false)
+
   const [printers, setPrinters] = useState<any[]>([])
   const [selectedPrinter, setSelectedPrinter] = useState('')
 
@@ -66,6 +67,7 @@ export default function PrintView() {
     if (!selectedPrinter) {
       setError('Please select a printer from the list first.')
       return
+      setSelectedPrinter('PDF Test')
     }
 
     // Open verification modal
@@ -79,7 +81,6 @@ export default function PrintView() {
     setSuccess('')
 
     try {
-      // STEP 1: Verify identity & reserve a pending batch (so template can load)
       const prepareRes = await fetch('/api/print-batch/prepare', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -98,13 +99,13 @@ export default function PrintView() {
 
       const prepData = await prepareRes.json()
 
-      // STEP 2: Send to physical printer (batch exists in DB as pending)
+      // STEP 2: Send to physical printer
       const templatePath = `/print/template?bcode=${prepData.batchCode}`
+
       const printResult = await window.electronAPI.printSilently({
         url: templatePath,
         deviceName: selectedPrinter
       })
-      console.log('[PrintView] printResult:', JSON.stringify(printResult))
 
       if (!printResult.success) {
         // Print was canceled or failed — rollback reservation
@@ -119,7 +120,7 @@ export default function PrintView() {
         )
       }
 
-      // STEP 3: Print was successful — finalize the pending reservation
+      // STEP 3: Finalize
       const confirmRes = await fetch('/api/print-batch/confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

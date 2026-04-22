@@ -4,13 +4,19 @@ const path = require('path');
 let mainWindow;
 
 function getStartUrl() {
-  // On Windows, `NODE_ENV` often isn't set for the Electron process when started via npm scripts.
-  // `app.isPackaged` is a reliable way to detect dev vs production for Electron.
+  let url = '';
   if (!app.isPackaged) {
-    return process.env.ELECTRON_START_URL || 'http://localhost:3000';
+    url = process.env.ELECTRON_START_URL || 'http://localhost:3000';
+  } else {
+    url = 'https://dbabwn-wakalatnamas.vercel.app';
   }
 
-  return 'https://dbabwn-wakalatnamas.vercel.app'; // Replace with your actual production URL
+  // Trim any accidental spaces and ensure no trailing slash for consistent concatenation
+  url = url.trim();
+  if (url.endsWith('/')) {
+    url = url.slice(0, -1);
+  }
+  return url;
 }
 
 function createWindow() {
@@ -25,7 +31,6 @@ function createWindow() {
     title: "DBABWN WakalatNamas",
     autoHideMenuBar: true,
   });
-  console.log("[main] window created");
   // Hide the default Electron menu (eliminates "Create Next App" or "Electron" menu items)
   const { Menu } = require('electron');
   Menu.setApplicationMenu(null);
@@ -33,18 +38,6 @@ function createWindow() {
   const startUrl = getStartUrl();
   mainWindow.loadURL(startUrl);
 
-  // if (!app.isPackaged) {
-  //   // Auto-open DevTools in dev
-  //   mainWindow.webContents.openDevTools({ mode: 'detach' });
-
-  //   // Optional: pipe renderer console.* to this terminal
-  //   mainWindow.webContents.on('console-message', (e) => {
-  //     const message = e?.message ?? '';
-  //     const sourceId = e?.sourceId ?? '';
-  //     const lineNumber = e?.lineNumber ?? '';
-  //     console.log(`[renderer] ${message} (${sourceId}:${lineNumber})`);
-  //   });
-  // }
 
   // Set a custom User Agent so the server can identify the desktop app
   mainWindow.webContents.setUserAgent(mainWindow.webContents.getUserAgent() + " WakalatDesktop");
@@ -62,40 +55,60 @@ ipcMain.handle('get-printers', async () => {
 
 ipcMain.handle('print-silent', async (event, { url, deviceName }) => {
   return new Promise((resolve) => {
-    // Create a hidden window for the actual print job
+    // Safety timeout: if anything hangs, resolve after 30 seconds
+    const timeout = setTimeout(() => {
+      if (printWindow) printWindow.close();
+      resolve({ success: false, error: 'Print job timed out' });
+    }, 30000);
+
     let printWindow = new BrowserWindow({
       show: false,
       webPreferences: {
-        offscreen: true // Optimization: don't render to screen
+        offscreen: true
       }
     });
 
-    printWindow.loadURL(getStartUrl() + url);
+    const fullUrl = getStartUrl() + url;
+    printWindow.loadURL(fullUrl);
 
-    printWindow.webContents.on('did-finish-load', () => {
-      // Small timeout to ensure styles (Tailwind/CSS) are fully applied
-      setTimeout(() => {
-        printWindow.webContents.print({
-          silent: true,
-          printBackground: true,
-          deviceName: deviceName,
-        }, (success, errorType) => {
-          printWindow.close();
-          if (success) {
+    printWindow.webContents.on('did-finish-load', async () => {
+      // Small timeout to ensure styles (Tailwind/CSS) and dynamic content (Microtext) are fully applied
+      setTimeout(async () => {
+        try {
+          // Check if print returns a promise (newer Electron) or uses a callback
+          const printOptions = {
+            silent: true,
+            printBackground: true,
+            deviceName: deviceName,
+          };
+
+          const result = printWindow.webContents.print(printOptions, (success, errorType) => {
+            // This callback is for older Electron versions
+            clearTimeout(timeout);
+            if (!printWindow.isDestroyed()) printWindow.close();
+            resolve({ success, error: errorType });
+          });
+
+          // If result is a promise, wait for it (newer Electron versions)
+          if (result instanceof Promise) {
+            await result;
+            clearTimeout(timeout);
+            if (!printWindow.isDestroyed()) printWindow.close();
             resolve({ success: true });
-          } else {
-            // Resolve (NOT reject) with failure — so the JS catch block is not triggered
-            // and the rollback logic in PrintView.tsx can run properly
-            resolve({ success: false, error: errorType });
           }
-        });
-      }, 500);
+        } catch (err) {
+          clearTimeout(timeout);
+          if (!printWindow.isDestroyed()) printWindow.close();
+          resolve({ success: false, error: err.message });
+        }
+      }, 1000); // Increased to 1s for safety
     });
 
-    // Safety net: if window fails to load, resolve with failure
-    printWindow.webContents.on('did-fail-load', () => {
-      printWindow.close();
-      resolve({ success: false, error: 'Failed to load print template' });
+    printWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+      console.error(`[main] Failed to load print template: ${errorCode} - ${errorDescription}`);
+      clearTimeout(timeout);
+      if (!printWindow.isDestroyed()) printWindow.close();
+      resolve({ success: false, error: `Failed to load template: ${errorDescription}` });
     });
   });
 });

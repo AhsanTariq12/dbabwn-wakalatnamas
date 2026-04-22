@@ -1,4 +1,5 @@
-import React from 'react';
+"use client"
+import React, { useEffect, useRef, useState } from 'react';
 
 interface Props {
   text?: string;
@@ -6,26 +7,54 @@ interface Props {
 }
 
 export default function MicrotextLine({
-  text = "District Bar Association Bahawalnagar",
+  text = "DBA-BWN-2026-2204-000001 - VALID ORIGINAL - ",
   className = ""
 }: Props) {
-  // Repeat the text enough times to fill the container width
-  const repeatedText = text.repeat(250);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLSpanElement>(null);
+  const [repeatCount, setRepeatCount] = useState(1);
+
+  useEffect(() => {
+    const calculate = () => {
+      if (!containerRef.current || !measureRef.current) return;
+
+      const containerWidth = containerRef.current.offsetWidth;
+      const textWidth = measureRef.current.offsetWidth;
+
+      if (textWidth === 0) return;
+
+      const count = Math.floor(containerWidth / textWidth);
+      setRepeatCount(count);
+    };
+
+    calculate();
+    window.addEventListener('resize', calculate);
+    return () => window.removeEventListener('resize', calculate);
+  }, [text]);
 
   return (
     <div
-      className={`overflow-hidden whitespace-nowrap flex items-center text-gray-400 opacity-80 ${className}`}
+      ref={containerRef}
+      className={`overflow-hidden whitespace-nowrap flex items-center ${className}`}
       style={{
-        fontSize: '2.4pt',       // Extremely small
-        letterSpacing: '-0.2pt', // Squished denser
-        lineHeight: '1',
-        height: '4pt',           // Tighter height for border framing
-        userSelect: 'none',
-        flexWrap: 'nowrap'
+        fontSize: '4pt',
+        lineHeight: '1.2',
+        height: '6pt',
+        userSelect: 'none'
       }}
-      aria-hidden="true"
     >
-      {repeatedText}
+      {/* Hidden measurement */}
+      <span
+        ref={measureRef}
+        className="absolute opacity-0 whitespace-nowrap"
+      >
+        {text}
+      </span>
+
+      {/* Render only full repetitions */}
+      {Array.from({ length: repeatCount }).map((_, i) => (
+        <span key={i}>{text}</span>
+      ))}
     </div>
   );
 }

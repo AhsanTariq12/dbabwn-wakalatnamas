@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "electron:dev": "concurrently \"next dev -p 3001\" \"wait-on http://localhost:3001 && set ELECTRON_START_URL=http://localhost:3001&& electron .\"",
+    "electron:dev": "concurrently \"next dev -p 3001\" \"wait-on http://localhost:3001 && set ELECTRON_START_URL=http://localhost:3001 && electron .\"",
+    "electron:build:dev": "copy .env.local .env && next build && electron-builder --win",
+    "electron:build:prod": "copy .env.production .env && next build && electron-builder --win",
     "electron:build": "next build && electron-builder"
   },
   "dependencies": {
@@ -43,7 +45,15 @@
       "output": "dist"
     },
     "win": {
-      "target": "nsis",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ],
       "icon": "public/logo.png"
     }
   }
