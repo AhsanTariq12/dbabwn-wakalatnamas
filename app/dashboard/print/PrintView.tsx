@@ -1,7 +1,8 @@
 'use client'
-import { Printer, ShieldAlert, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Printer, ShieldAlert, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 import PrintPasswordModal from '@/components/PrintPasswordModal'
 import { useEffect, useState } from 'react'
+import { getWakalatPriceAction } from '@/app/actions/price'
 
 export default function PrintView() {
 
@@ -19,16 +20,31 @@ export default function PrintView() {
   // Security State
   const [showPasswordModal, setShowPasswordModal] = useState(false)
 
-  const WAKALAT_PRICE = 100 // Rs 100 per Wakalat Nama
-  const amountPaid = quantity * WAKALAT_PRICE
+  const [wakalatPrice, setWakalatPrice] = useState<number | null>(null)
+  const amountPaid = wakalatPrice ? quantity * wakalatPrice : 0
 
   useEffect(() => {
+    fetchPriceSettings()
+
     // Check if running inside Electron
     if (typeof window !== 'undefined' && window.electronAPI) {
       setIsDesktop(true)
       fetchPrinters()
     }
   }, [])
+
+  async function fetchPriceSettings() {
+    try {
+      const res = await getWakalatPriceAction()
+      if (res.success) {
+        setWakalatPrice(res.price)
+      } else {
+        setWakalatPrice(100) // Default fallback
+      }
+    } catch {
+      setWakalatPrice(100)
+    }
+  }
 
   async function fetchPrinters() {
     try {
@@ -67,7 +83,7 @@ export default function PrintView() {
     if (!selectedPrinter) {
       setError('Please select a printer from the list first.')
       return
-      setSelectedPrinter('PDF Test')
+
     }
 
     // Open verification modal
@@ -101,7 +117,7 @@ export default function PrintView() {
 
       // STEP 2: Send to physical printer
       const templatePath = `/print/template?bcode=${prepData.batchCode}`
-
+      // window.open(templatePath, '_blank')
       const printResult = await window.electronAPI.printSilently({
         url: templatePath,
         deviceName: selectedPrinter
@@ -161,6 +177,13 @@ export default function PrintView() {
       </div>
 
       <div className={`backdrop-blur-xl bg-white/[0.02] border border-white/[0.05] shadow-2xl rounded-3xl p-8 transition-opacity ${!isDesktop ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+
+        {wakalatPrice === null && isDesktop && (
+          <div className="bg-blue-500/10 border border-blue-500/30 text-blue-400 p-4 rounded-xl mb-6 flex items-center justify-center gap-3">
+            <Loader2 className="animate-spin" size={18} />
+            <span className="text-sm font-medium">Synchronizing Pricing Matrix...</span>
+          </div>
+        )}
 
         {!isDesktop && (
           <div className="bg-amber-500/10 border border-amber-500/30 text-amber-500 p-6 rounded-2xl mb-8 flex items-start gap-4">
@@ -258,8 +281,8 @@ export default function PrintView() {
           <div className="pt-4">
             <button
               type="submit"
-              disabled={loading || !isDesktop}
-              className={`w-full h-14 font-medium rounded-xl text-white flex items-center justify-center space-x-3 transition-all shadow-lg ${loading || !isDesktop
+              disabled={loading || !isDesktop || wakalatPrice === null}
+              className={`w-full h-14 font-medium rounded-xl text-white flex items-center justify-center space-x-3 transition-all shadow-lg ${loading || !isDesktop || wakalatPrice === null
                 ? 'bg-blue-600/30 cursor-not-allowed opacity-50'
                 : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 focus:ring-2 focus:ring-blue-500/50 active:scale-[0.98]'
                 }`}

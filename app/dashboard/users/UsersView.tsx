@@ -2,7 +2,10 @@
 
 import { useState, useEffect, FormEvent } from 'react'
 import { getUsersAction, createUserAction, deleteUserAction } from '@/app/actions/users'
-import { Loader2, UserPlus, Shield, User, Mail, Calendar, Trash2, Users } from 'lucide-react'
+import { createClient } from '@/utils/supabase/client'
+import { Loader2, UserPlus, Shield, User, Mail, Calendar, Trash2, Users, Settings } from 'lucide-react'
+import { getWakalatPriceAction, setWakalatPriceAction } from '@/app/actions/price'
+import PrintPasswordModal from '@/components/PrintPasswordModal'
 
 export default function UsersView() {
   const [users, setUsers] = useState<any[]>([])
@@ -16,9 +19,68 @@ export default function UsersView() {
   const [password, setPassword] = useState('')
   const [role, setRole] = useState('viewer')
 
+  // Settings State
+  const [wakalatPrice, setWakalatPrice] = useState<number | ''>('')
+  const [isUpdatingPrice, setIsUpdatingPrice] = useState(false)
+  const [priceMessage, setPriceMessage] = useState({ text: '', type: '' })
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
+  const [showPricePasswordModal, setShowPricePasswordModal] = useState(false)
+
   useEffect(() => {
     fetchUsers()
+    fetchSettings()
   }, [])
+
+  async function fetchSettings() {
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      const res = await getWakalatPriceAction()
+      if (res.success && res.price !== undefined) {
+        setWakalatPrice(res.price)
+      }
+      
+      if (user) {
+         // Evaluated in fetchUsers below
+      }
+    } catch (err) {
+      console.error('Failed to load settings:', err)
+    }
+  }
+
+  async function handleUpdatePrice(e: FormEvent) {
+    e.preventDefault()
+    setPriceMessage({ text: '', type: '' })
+
+    const parsedPrice = Number(wakalatPrice)
+    if (isNaN(parsedPrice) || parsedPrice <= 0) {
+      setPriceMessage({ text: 'Price must be greater than 0.', type: 'error' })
+      return
+    }
+
+    setShowPricePasswordModal(true)
+  }
+
+  async function executePriceUpdate(password: string) {
+    setShowPricePasswordModal(false)
+    setIsUpdatingPrice(true)
+    setPriceMessage({ text: '', type: '' })
+
+    try {
+      const res = await setWakalatPriceAction(Number(wakalatPrice), password)
+
+      if (res.success) {
+        setPriceMessage({ text: res.message || 'Price updated successfully.', type: 'success' })
+      } else {
+        setPriceMessage({ text: res.error || 'Failed to update price.', type: 'error' })
+      }
+    } catch (err) {
+      setPriceMessage({ text: 'An unexpected error occurred.', type: 'error' })
+    } finally {
+      setIsUpdatingPrice(false)
+    }
+  }
 
   async function fetchUsers() {
     setLoading(true)
@@ -33,6 +95,15 @@ export default function UsersView() {
         return 0;
       });
       setUsers(sorted)
+      // Find current user to set isSuperAdmin
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const currentUserProfile = sorted.find(u => u.id === user.id)
+        if (currentUserProfile?.role === 'super_admin') {
+          setIsSuperAdmin(true)
+        }
+      }
     } else {
       console.error(result.error)
     }
@@ -170,6 +241,46 @@ export default function UsersView() {
               </button>
             </form>
           </div>
+
+          {/* Global System Settings - Visible only to SuperAdmin */}
+          {isSuperAdmin && (
+            <div className="p-6 rounded-2xl bg-white/[0.01] border border-white/5 mb-6">
+              <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
+                <div className="p-2.5 rounded-lg bg-orange-500/10 text-orange-400">
+                  <Settings size={20} />
+                </div>
+                <h2 className="text-xl font-semibold text-white">System Settings</h2>
+              </div>
+
+              {priceMessage.text && (
+                <div className={`mb-4 p-3 border rounded-lg text-sm ${priceMessage.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
+                  {priceMessage.text}
+                </div>
+              )}
+
+              <form onSubmit={handleUpdatePrice} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1.5">Price Per Wakalat Nama (Rs)</label>
+                  <input
+                    type="number"
+                    required
+                    value={wakalatPrice}
+                    onChange={e => setWakalatPrice(e.target.value === '' ? '' : Number(e.target.value))}
+                    className="w-full h-11 px-4 rounded-xl bg-white/[0.02] border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all text-sm"
+                    placeholder="e.g. 100"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isUpdatingPrice}
+                  className="w-full h-11 mt-2 bg-orange-600 hover:bg-orange-500 text-white font-medium rounded-xl transition-colors flex items-center justify-center disabled:opacity-50"
+                >
+                  {isUpdatingPrice ? <Loader2 className="animate-spin" size={18} /> : 'Save New Price'}
+                </button>
+              </form>
+            </div>
+          )}
         </div>
 
         {/* Existing Users List Section */}
@@ -232,6 +343,13 @@ export default function UsersView() {
           </div>
         </div>
       </div>
+
+      {showPricePasswordModal && (
+        <PrintPasswordModal
+          onSuccess={(pw) => executePriceUpdate(pw)}
+          onCancel={() => setShowPricePasswordModal(false)}
+        />
+      )}
     </>
   )
 }

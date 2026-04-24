@@ -97,24 +97,21 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
 
               {/* Header */}
               <div className="flex justify-between items-center     ">
-                <div className="w-24 h-24 rounded-full border-2 border-black flex items-center justify-center bg-transparent shadow-sm ml-16">
+                <div className="w-28 h-28 rounded-full border-2 border-black flex items-center justify-center bg-transparent shadow-sm ml-16">
                   <img src='/logo.png' alt='logo' className=' logo-black' />
                 </div>
 
-                <div className="flex flex-col items-center justify-center flex-1 bg-transparent">
-                  <div className="text-[28pt] font-bold leading-none -mt-4 drop-shadow-sm bg-transparent">وکالت نامہ</div>
-                  <div className="text-base mt-2 bg-transparent font-bold">ڈسٹرکٹ بار ایسوسی ایشن بہاول نگر</div>
+                <div className="flex flex-col items-center justify-center  bg-transparent mr-[44px]">
+                  <div className="text-[32pt] font-bold leading-none -mt-4 drop-shadow-sm bg-transparent">وکالت نامہ</div>
+                  <div className="text-base mt-2 bg-transparent font-bold">ڈسٹرکٹ بار ایسوسی ایشن، بہاول نگر</div>
                 </div>
 
-                <div className="w-24 h-24 rounded-full border-2 border-black flex items-center justify-center bg-transparent shadow-sm mr-16">
-                  <img src='/logo.png' alt='logo' className=' logo-black' />
+                <div className="h-24 w-24 flex justify-left left 0 font-bold mt-4 ml-[125px]">
+                  <span className='whitespace-nowrap text-[14pt] '>{serial}</span>
                 </div>
               </div>
 
-              {/* Serial Number Display */}
-              <div className="absolute -top-[24px] left-0 font-mono font-bold text-[10pt] border-b-2 border-black bg-transparent  z-20 " dir="ltr">
-                Serial No: <span className='tracking-widest'>{serial}</span>
-              </div>
+
 
               {/* Price / Court Fee Banner */}
               <div className="flex justify-center items-center select-none">
@@ -203,48 +200,34 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
                     <div className="-rotate-90 origin-center"><span className="text-[22pt] font-black tracking-[15px] alabid-vertical inline-block">العبد</span></div>
                   </div>
                   <div className='flex-1 flex flex-col  bg-transparent relative z-10 px-[24px] h-fit'>
-                    <div className="flex items-end text-[16pt] mb-8">
+                    <div className="flex items-end text-[16pt] mb-6">
                       <div className="flex-[3] flex items-end">
-                        <div className="font-bold whitespace-nowrap text-2xl">بعدالت جناب</div>
+                        <div className="font-bold whitespace-nowrap text-3xl">بعدالت جناب</div>
                         <div className="flex-1 border-b-[2px] border-black mr-4 h-8"></div>
                       </div>
-                      <div className="flex-[1] flex items-end">
+                      <div className="flex-[1.5] flex items-end">
                         <div className="font-bold whitespace-nowrap text-[16pt] mr-6">منجانب</div>
                         <div className="flex-1 border-b-[2px] border-black mr-2 ml-2 h-8"></div>
                       </div>
                     </div>
 
-                    <div className="flex items-end text-[16pt] mb-8">
+                    <div className="flex items-end text-[16pt] mb-6">
                       <div className="flex-[2] flex items-end">
-                        <div className="font-bold whitespace-nowrap text-[16pt]">مدعی</div>
+                        <div className="font-bold whitespace-nowrap text-[16pt]">عنوان</div>
                         <div className="flex-1 border-b-[2px] border-black mr-4 h-8"></div>
                       </div>
                       <div className="flex-[2] flex items-end">
-                        <div className="font-bold whitespace-nowrap text-[16pt] mr-6">مدعا علیہ</div>
+                        <div className="font-bold whitespace-nowrap text-[16pt] mr-6">  بنام</div>
                         <div className="flex-1 border-b-[2px] border-black mr-2 ml-2 h-8"></div>
                       </div>
                       <div className="flex-[2] flex items-end">
-                        <div className="font-bold whitespace-nowrap text-[16pt]">دعویٰ</div>
+                        <div className="font-bold whitespace-nowrap text-[16pt]">دعویٰ‌‌‌‌‌‌‌‌‌‌ / درخواست</div>
                         <div className="flex-1 border-b-[2px] border-black mr-4 h-8"></div>
                       </div>
                     </div>
 
-                    <div className="flex items-end text-[16pt] mb-8">
-                      <div className="flex-[1.5] flex items-end">
-                        <div className="font-bold whitespace-nowrap text-[16pt]">مستغیث</div>
-                        <div className="flex-1 border-b-[2px] border-black mr-4 h-8"></div>
-                      </div>
-                      <div className="flex-[2] flex items-end justify-start">
-                        <div className="font-black text-2xl px-6">بنام</div>
-                        <div className="flex-1 border-b-[2px] border-black mr-2 ml-2 h-8"></div>
-                      </div>
-                      <div className="flex-[0.5] flex items-end">
-                        <div className="font-bold whitespace-nowrap text-[16pt]">(ملزم ریسپانڈنٹ)</div>
 
-                      </div>
-                    </div>
-
-                    <div className="flex items-end text-[16pt] mb-8 w-full">
+                    <div className="flex items-end text-[16pt] mb-6 w-full">
 
                       <div className="flex-[1.5] flex items-end">
                         <div className="font-bold text-[16pt] whitespace-nowrap">مقدمہ نمبر</div>
@@ -256,21 +239,25 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
                       </div>
                     </div>
 
-                    <div className="flex items-end text-[16pt] mb-8 w-full">
+                    <div className="flex items-end text-[16pt] mb-6 w-full">
                       <div className="flex-[3] w-[45%] flex items-end">
                         <div className="font-bold whitespace-nowrap text-[16pt]">مقدمہ مندرجہ عنوان میں اپنی طرف سے بمقام</div>
-                        <div className="flex-1 border-b-[2px] border-black mr-4 h-8"></div>
+                        <div className="flex-2  border-b-[2px] border-black mr-6 h-8"></div>
+                        <div className="flex-4  font-bold whitespace-nowrap text-[16pt] text-left">برائے پیروی و جوابدہی اپنی طرف سے </div>
                       </div>
+
+
                     </div>
                     <div className="flex items-end text-[16pt] mb-2 w-full">
-                      <div className="flex-1 font-bold whitespace-nowrap text-[16pt]">برائے پیروی و جوابدہی</div>
+                      <div className=" font-bold whitespace-nowrap text-[16pt]">  <span className="text-3xl">محترم جناب</span> </div>
                       <div className="flex-3 border-b-[2px] border-black mr-2 ml-2 h-8"></div>
                     </div>
 
 
 
+
                     <div className="text-[16pt] leading-[2.15] text-justify font-medium leading-[32px]">
-                      کو بدیں بشرط مقرر ہے کہ میں ہر پیشی پر خو یا بذریعہ مختیار خاص بروز پیشی حاضر ہوتا رہوں گا۔ اور بروقت پکارے جانے وکیل صاحب
+                      کو  بدین شرط وکیل مقرر کیا ہے کہ میں ہر پیشی پر خو یا بذریعہ مختیار خاص بروز پیشی حاضر ہوتا رہوں گا۔ اور بروقت پکارے جانے وکیل صاحب
                       موصوف کو اطلاع دے کر حاضر عدالت کروں گا۔ پیشی پر مظہر حاضر نہ ہوا اور مقدمہ میری غیر حاضری کی وجہ سے کسی طور پر میرے برخلاف ہو گیا
                       تو صاحب موصوف اس کے کسی طرح ذمہ دار نہ ہوں گے۔ اگر مقدمہ صاحب مذکور کی کسی دانستہ غفلت سے میرے برخلاف ہو گیا تو
                       صاحب موصوف تا حد مختانہ نقصانات یا ہرجانہ کے ذمہ دار ہوں گے۔ لیکن وکیل موصوف صدر مقام کچہری کے علاوہ اور جگہ سماعت ہونے یا
