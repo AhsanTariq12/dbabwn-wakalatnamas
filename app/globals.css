@@ -29,14 +29,14 @@ body {
 .alabid-vertical {
   font-weight: 700;
   font-style: normal;
-  transform: scaleX(2.6);
+  transform: scaleX(2.2);
   letter-spacing: 0.5em;
 }
 
 .alabid-down {
   font-weight: 700;
   font-style: normal;
-  transform: scaleX(2.6);
+  transform: scaleX(2.2);
   letter-spacing: 0.5em;
 
 }

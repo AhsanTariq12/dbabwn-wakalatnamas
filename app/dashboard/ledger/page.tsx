@@ -71,36 +71,33 @@ export default function LedgerPage() {
 
       // We prioritize Search if it exists (Global Search as requested)
       if (query) {
-        // Step 1: Find Batch IDs matching the serial number suffix
-        const { data: serialMatches } = await supabase
-          .from('wakalat_namas')
-          .select('batch_id')
-          .ilike('serial_number', `%${query}`)
+        const isNumeric = /^\d+$/.test(query)
+        if (!isNumeric) {
+          setBatches([])
+          setStats({ totalBatches: 0, totalForms: 0 })
+          setHasMore(false)
+          setLoading(false)
+          return
+        }
 
-        const matchedIds = Array.from(new Set(serialMatches?.map(s => s.batch_id) || []))
+        const serialNum = parseInt(query)
 
-        // Step 2: Fetch Batches that match the Batch Code OR are in the serial matches list
+        // Directly find batches where the serial number falls within the stored range
         let request = supabase
           .from('batches')
           .select('*, wakalat_namas(serial_number)')
           .eq('status', 'printed')
+          .lte('serial_start', serialNum)
+          .gte('serial_end', serialNum)
           .order('created_at', { ascending: false })
-
-        if (matchedIds.length > 0) {
-          // Stable OR logic: Find by code or by the specific IDs we just found
-          request = request.or(`batch_code.ilike.%${query}%,id.in.(${matchedIds.join(',')})`)
-        } else {
-          // Just search batch code if no serials match
-          request = request.ilike('batch_code', `%${query}%`)
-        }
 
         const { data, error } = await request
         if (error) throw error
-        
+
         // In Search mode, we just show all matches (usually small set)
         setBatches(data || [])
         setHasMore(false) // Disable load more in global search mode
-        
+
         // Calculate Search Stats
         const searchForms = data?.reduce((acc: number, b: any) => acc + (b.quantity || 0), 0) || 0
         setStats({ totalBatches: data?.length || 0, totalForms: searchForms })
@@ -139,7 +136,7 @@ export default function LedgerPage() {
 
         if (reset) {
           setBatches(data || [])
-          
+
           // Get total forms sum for date mode (only on reset to save requests)
           let sumReq = supabase.from('batches').select('quantity').eq('status', 'printed')
           sumReq = applyFilters(sumReq)

@@ -81,6 +81,9 @@ export default function PrintView() {
     }
 
     if (!selectedPrinter) {
+      //For development
+      // setSelectedPrinter('PDF Test')
+
       setError('Please select a printer from the list first.')
       return
 

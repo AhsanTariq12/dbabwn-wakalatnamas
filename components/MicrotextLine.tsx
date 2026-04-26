@@ -7,7 +7,7 @@ interface Props {
 }
 
 export default function MicrotextLine({
-  text = "DBA-BWN-2026-2204-000001 - VALID ORIGINAL - ",
+  text = " ",
   className = ""
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -35,9 +35,9 @@ export default function MicrotextLine({
   return (
     <div
       ref={containerRef}
-      className={`overflow-hidden whitespace-nowrap flex items-center ${className}`}
+      className={`overflow-hidden whitespace-nowrap flex items-center text-gray-400 font-bold z-10 select-none opacity-50 text-center leading-tight tracking-widest mt-2 ${className}`}
       style={{
-        fontSize: '4pt',
+        fontSize: '6pt',
         lineHeight: '1.2',
         height: '6pt',
         userSelect: 'none'
