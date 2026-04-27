@@ -120,6 +120,7 @@ export default function PrintView() {
 
       // STEP 2: Send to physical printer
       const templatePath = `/print/template?bcode=${prepData.batchCode}`
+      // For development
       // window.open(templatePath, '_blank')
       const printResult = await window.electronAPI.printSilently({
         url: templatePath,

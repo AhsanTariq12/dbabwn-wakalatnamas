@@ -76,7 +76,7 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
         return (
           <div
             key={serial}
-            className="print-container relative w-[210mm] h-[297mm] max-h-[297mm] overflow-hidden bg-white box-border px-[16mm] py-[8mm] mx-auto"
+            className="print-container relative w-[210mm] h-[297mm] max-h-[297mm] overflow-hidden bg-white box-border px-[23mm] py-[8mm] mx-auto"
             style={{
               pageBreakAfter: isLast ? 'auto' : 'always',
               breakAfter: isLast ? 'auto' : 'page',
@@ -126,7 +126,7 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
 
                 {/* Court Fee (Right Side, pointing Right Outward > ) */}
 
-                <div className="relative h-24 w-32 ">
+                <div className="relative h-24 w-28 ">
                   <svg
                     className="absolute inset-0 w-full h-full"
                     viewBox="0 0 100 100"
@@ -154,7 +154,7 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
                 <div className=" flex justify-center items-center bg-transparent">
                   <div
                     className="relative flex items-center justify-center p-2"
-                    style={{ width: '2.4in', height: '2.4in' }}
+                    style={{ width: '2.2in', height: '2.2in' }}
                   >
                     <svg className="absolute inset-0 w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
                       <polygon points="28,0 72,0 100,28 100,72 72,100 28,100 0,72 0,28" fill="transparent" stroke="black" strokeWidth="2" vectorEffect="non-scaling-stroke" />
@@ -166,7 +166,7 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
                 </div>
 
                 {/* Price (Left Side, pointing Left Outward < ) */}
-                <div className="relative h-24 w-32 ">
+                <div className="relative h-24 w-28 ">
                   <svg
                     className="absolute inset-0 w-full h-full"
                     viewBox="0 0 100 100"
@@ -233,9 +233,9 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
                     <div className="-rotate-90 origin-center"><span className="text-[22pt] font-black tracking-[15px] alabid-vertical inline-block">العبد</span></div>
                   </div>
                   <div className='flex-1 flex flex-col  bg-transparent relative z-10 px-[24px] h-fit'>
-                    <div className="flex items-end text-[16pt] mb-4">
+                    <div className="flex items-end text-[16pt] mb-2">
                       <div className="flex-[3] flex items-end">
-                        <div className="font-bold whitespace-nowrap text-3xl">بعدالت جناب</div>
+                        <div className="font-bold whitespace-nowrap text-[18pt]">بعدالت جناب</div>
                         <div className="flex-1 border-b-[2px] border-black mr-4 h-8"></div>
                       </div>
                       <div className="flex-[1.5] flex items-end">
@@ -244,7 +244,7 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
                       </div>
                     </div>
 
-                    <div className="flex items-end text-[16pt] mb-4">
+                    <div className="flex items-end text-[16pt] mb-2">
                       <div className="flex-[2] flex items-end">
                         <div className="font-bold whitespace-nowrap text-[16pt]">عنوان</div>
                         <div className="flex-1 border-b-[2px] border-black mr-4 h-8"></div>
@@ -255,7 +255,7 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
                       </div>
 
                     </div>
-                    <div className="flex items-end text-[16pt] mb-4">
+                    <div className="flex items-end text-[16pt] mb-2">
 
                       <div className="flex-[3] flex items-end">
                         <div className="font-bold whitespace-nowrap text-[16pt]">دعویٰ‌‌‌‌‌‌‌‌‌‌ / درخواست</div>
@@ -265,7 +265,7 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
                     </div>
 
 
-                    <div className="flex items-end text-[16pt] mb-4 w-full">
+                    <div className="flex items-end text-[16pt] mb-2 w-full">
 
                       <div className="flex-[1.5] flex items-end">
                         <div className="font-bold text-[16pt] whitespace-nowrap">مقدمہ نمبر</div>
@@ -277,7 +277,7 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
                       </div>
                     </div>
 
-                    <div className="flex items-end text-[16pt] mb-4 w-full">
+                    <div className="flex items-end text-[16pt] mb-2 w-full">
                       <div className="flex-[3] w-[45%] flex items-end">
                         <div className="font-bold whitespace-nowrap text-[16pt]">مقدمہ مندرجہ عنوان میں اپنی طرف سے بمقام</div>
                         <div className="flex-5  border-b-[2px] border-black mr-6 h-8"></div>
@@ -286,15 +286,15 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
 
 
                     </div>
-                    <div className="flex items-end text-[16pt] mb-2 w-full">
-                      <div className=" font-bold whitespace-nowrap text-[16pt]">  <span className="text-3xl">محترم جناب</span> </div>
+                    <div className="flex items-end  mb-2 w-full">
+                      <div className=" font-bold whitespace-nowrap ">  <span className="text-[18pt]">محترم جناب</span> </div>
                       <div className="flex-3 border-b-[2px] border-black mr-2 ml-2 h-8"></div>
                     </div>
 
 
 
 
-                    <div className="text-[14pt] leading-[2.15] text-justify font-medium leading-[28px]">
+                    <div className="text-[13pt] leading-[2.15] text-justify font-medium leading-[28px]">
                       کو  بدین شرط وکیل مقرر کیا ہے کہ میں ہر پیشی پر خود یا بذریعہ مختیار خاص بروز پیشی حاضر ہوتا رہوں گا۔ اور بروقت پکارے جانے وکیل صاحب
                       موصوف کو اطلاع دے کر حاضر عدالت کروں گا۔ پیشی پر مظہر حاضر نہ ہوا اور مقدمہ میری غیر حاضری کی وجہ سے کسی طور پر میرے برخلاف ہو گیا
                       تو صاحب موصوف اس کے کسی طرح ذمہ دار نہ ہوں گے۔ اگر مقدمہ صاحب مذکور کی کسی دانستہ غفلت سے میرے برخلاف ہو گیا تو
