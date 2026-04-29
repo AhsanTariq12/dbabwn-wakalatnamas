@@ -107,6 +107,7 @@ export default function LedgerPage() {
         let request = supabase
           .from('batches')
           .select('*, wakalat_namas(serial_number)', { count: 'exact' })
+          .eq('status', 'printed')
           .order('created_at', { ascending: false })
 
         // Apply Date Filters (re-using the logic for the count/sum too)

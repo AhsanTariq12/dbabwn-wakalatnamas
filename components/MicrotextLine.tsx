@@ -35,11 +35,11 @@ export default function MicrotextLine({
   return (
     <div
       ref={containerRef}
-      className={`overflow-hidden whitespace-nowrap flex items-center text-gray-400 font-bold z-10 select-none opacity-50 text-center leading-tight tracking-widest mt-2 ${className}`}
+      className={`overflow-hidden whitespace-nowrap flex items-center text-gray-500 font-bold z-10 select-none text-center leading-tight tracking-widest mt-2 opacity-[0.25] ${className}`}
       style={{
-        fontSize: '6pt',
-        lineHeight: '1.2',
-        height: '6pt',
+        fontSize: '3pt',
+        lineHeight: '4pt',
+        height: '4pt',
         userSelect: 'none'
       }}
     >

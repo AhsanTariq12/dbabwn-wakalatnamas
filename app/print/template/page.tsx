@@ -3,6 +3,7 @@ import DotNoise from '@/components/DotNoise'
 import Guilloche from '@/components/Guilloche'
 import Watermark from '@/components/Watermark'
 import MicrotextLine from '@/components/MicrotextLine'
+import QRCode from "react-qr-code"
 
 import localFont from 'next/font/local';
 
@@ -76,7 +77,7 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
         return (
           <div
             key={serial}
-            className="print-container relative w-[210mm] h-[297mm] max-h-[297mm] overflow-hidden bg-white box-border px-[23mm] py-[8mm] mx-auto"
+            className="print-container relative w-[210mm] h-[297mm] max-h-[297mm] overflow-hidden bg-white box-border px-[30mm] py-[8mm] mx-auto"
             style={{
               pageBreakAfter: isLast ? 'auto' : 'always',
               breakAfter: isLast ? 'auto' : 'page',
@@ -85,7 +86,7 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
           >
             {/* React Security Components */}
             <DotNoise />
-            <Watermark text="DBA BWN" />
+            <Watermark text=" <img src='/logo.png' alt='District Bar Assoication BWN' className=' ' />" />
 
             {/* The Outer Box Formed Purely by Microtext! */}
             <div className="absolute inset-0 z-0 pointer-events-none border-[14px] border-transparent" style={{ padding: '7mm' }}>
@@ -113,26 +114,33 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
                   <div className="text-base mt-2 bg-transparent font-bold text-[15pt]">ڈسٹرکٹ بار ایسوسی ایشن، بہاول نگر</div>
                 </div>
 
-                <div className="h-24 flex flex-col items-start  font-bold mt-4 leading-tight" dir="ltr">
-                  <div className='whitespace-nowrap text-[16pt]'>DATED:{dateStr}</div>
-                  <div className='whitespace-nowrap text-[16pt]'>S.NO#{serial}</div>
+                <div className="h-32 flex flex-col items-start font-bold mt-0 leading-tight" dir="ltr">
+                  <div className='whitespace-nowrap text-[16pt] '>DATED:{dateStr}</div>
+                  <div className='whitespace-nowrap text-[16pt] opacity-[0.25] text-gray-500 mb-1'>S.NO#{serial}</div>
+                  <div className='p-1 border-[1.5px] border-black bg-white'>
+                    <QRCode
+                      value={`https://dbabwn-wakalatnamas.vercel.app/verify/${encodeURIComponent(serial)}`}
+                      size={52}
+                      level="L"
+                    />
+                  </div>
                 </div>
               </div>
 
 
 
               {/* Price / Court Fee Banner */}
-              <div className="flex justify-center items-center select-none my-2">
+              <div className="flex justify-between items-center select-none my-2 mt-0">
 
                 {/* Court Fee (Right Side, pointing Right Outward > ) */}
 
-                <div className="relative h-24 w-28 ">
+                {/* <div className="relative h-24 w-28 ">
                   <svg
                     className="absolute inset-0 w-full h-full"
                     viewBox="0 0 100 100"
                     preserveAspectRatio="none"
                   >
-                    {/* Rectangle instead of triangle */}
+                
                     <rect
                       x="0"
                       y="0"
@@ -148,8 +156,8 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
                   <div className="absolute inset-0 flex items-center justify-center font-black text-center">
                     کورٹ فیس
                   </div>
-                </div>
-
+                </div> */}
+                <div className="mr-[42px] font-bold">صدر</div>
                 {/* Middle Blank Octagon */}
                 <div className=" flex justify-center items-center bg-transparent">
                   <div
@@ -164,15 +172,15 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
                     </span>
                   </div>
                 </div>
-
+                <div className="ml-[42px] font-bold">سیکرٹری</div>
                 {/* Price (Left Side, pointing Left Outward < ) */}
-                <div className="relative h-24 w-28 ">
+                {/* <div className="relative h-24 w-28 ">
                   <svg
                     className="absolute inset-0 w-full h-full"
                     viewBox="0 0 100 100"
                     preserveAspectRatio="none"
                   >
-                    {/* Rectangle instead of triangle */}
+                 
                     <rect
                       x="0"
                       y="0"
@@ -188,7 +196,7 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
                   <div className="absolute inset-0 flex items-center justify-center font-black text-center">
                     قیمتی
                   </div>
-                </div>
+                </div> */}
               </div>
               {/* <div className="relative h-24 w-32 "> */}
               {/* <svg
@@ -236,22 +244,22 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
                     <div className="flex items-end text-[16pt] mb-2">
                       <div className="flex-[3] flex items-end">
                         <div className="font-bold whitespace-nowrap text-[18pt]">بعدالت جناب</div>
-                        <div className="flex-1 border-b-[2px] border-black mr-4 h-8"></div>
+                        <div className="flex-1  opacity-[0.35] border-b-[1.5px] border-dotted border-black mr-4 h-8"></div>
                       </div>
                       <div className="flex-[1.5] flex items-end">
                         <div className="font-bold whitespace-nowrap text-[16pt] mr-6">منجانب</div>
-                        <div className="flex-1 border-b-[2px] border-black mr-2 ml-2 h-8"></div>
+                        <div className="flex-1  opacity-[0.35] border-b-[1.5px] border-dotted border-black mr-2 ml-2 h-8"></div>
                       </div>
                     </div>
 
                     <div className="flex items-end text-[16pt] mb-2">
                       <div className="flex-[2] flex items-end">
                         <div className="font-bold whitespace-nowrap text-[16pt]">عنوان</div>
-                        <div className="flex-1 border-b-[2px] border-black mr-4 h-8"></div>
+                        <div className="flex-1  opacity-[0.35] border-b-[1.5px] border-dotted border-black mr-4 h-8"></div>
                       </div>
                       <div className="flex-[2] flex items-end">
                         <div className="font-bold whitespace-nowrap text-[16pt] mr-6">  بنام</div>
-                        <div className="flex-1 border-b-[2px] border-black mr-2 ml-2 h-8"></div>
+                        <div className="flex-1  opacity-[0.35] border-b-[1.5px] border-dotted border-black mr-2 ml-2 h-8"></div>
                       </div>
 
                     </div>
@@ -259,7 +267,7 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
 
                       <div className="flex-[3] flex items-end">
                         <div className="font-bold whitespace-nowrap text-[16pt]">دعویٰ‌‌‌‌‌‌‌‌‌‌ / درخواست</div>
-                        <div className="flex-1 border-b-[2px] border-black mr-4 h-8"></div>
+                        <div className="flex-1  opacity-[0.35] border-b-[1.5px] border-dotted border-black mr-4 h-8"></div>
                       </div>
 
                     </div>
@@ -269,18 +277,18 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
 
                       <div className="flex-[1.5] flex items-end">
                         <div className="font-bold text-[16pt] whitespace-nowrap">مقدمہ نمبر</div>
-                        <div className="flex-1 border-b-[2px] border-black mr-4 h-8"></div>
+                        <div className="flex-1  opacity-[0.35] border-b-[1.5px] border-dotted border-black mr-4 h-8"></div>
                       </div>
                       <div className="flex-[2.5] flex items-end">
                         <div className="font-bold text-[16pt] whitespace-nowrap">جرم</div>
-                        <div className="flex-1 border-b-[2px] border-black mr-4 h-8"></div>
+                        <div className="flex-1  opacity-[0.35] border-b-[1.5px] border-dotted border-black mr-4 h-8"></div>
                       </div>
                     </div>
 
                     <div className="flex items-end text-[16pt] mb-2 w-full">
                       <div className="flex-[3] w-[45%] flex items-end">
                         <div className="font-bold whitespace-nowrap text-[16pt]">مقدمہ مندرجہ عنوان میں اپنی طرف سے بمقام</div>
-                        <div className="flex-5  border-b-[2px] border-black mr-6 h-8"></div>
+                        <div className="flex-5   opacity-[0.35] border-b-[1.5px] border-dotted border-black mr-6 h-8"></div>
                         <div className="flex-4  font-bold whitespace-nowrap text-[16pt] text-left">برائے پیروی و جوابدہی </div>
                       </div>
 
@@ -288,13 +296,13 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
                     </div>
                     <div className="flex items-end  mb-2 w-full">
                       <div className=" font-bold whitespace-nowrap ">  <span className="text-[18pt]">محترم جناب</span> </div>
-                      <div className="flex-3 border-b-[2px] border-black mr-2 ml-2 h-8"></div>
+                      <div className="flex-3  opacity-[0.35] border-b-[1.5px] border-dotted border-black mr-2 ml-2 h-8"></div>
                     </div>
 
 
 
 
-                    <div className="text-[13pt] leading-[2.15] text-justify font-medium leading-[28px]">
+                    <div className="text-[10pt] leading-[2.15] text-justify font-medium leading-[28px]">
                       کو  بدین شرط وکیل مقرر کیا ہے کہ میں ہر پیشی پر خود یا بذریعہ مختیار خاص بروز پیشی حاضر ہوتا رہوں گا۔ اور بروقت پکارے جانے وکیل صاحب
                       موصوف کو اطلاع دے کر حاضر عدالت کروں گا۔ پیشی پر مظہر حاضر نہ ہوا اور مقدمہ میری غیر حاضری کی وجہ سے کسی طور پر میرے برخلاف ہو گیا
                       تو صاحب موصوف اس کے کسی طرح ذمہ دار نہ ہوں گے۔ اگر مقدمہ صاحب مذکور کی کسی دانستہ غفلت سے میرے برخلاف ہو گیا تو
