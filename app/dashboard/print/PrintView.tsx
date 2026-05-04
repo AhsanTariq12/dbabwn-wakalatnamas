@@ -12,7 +12,7 @@ export default function PrintView() {
   const [success, setSuccess] = useState('')
 
   // Desktop-specific state
-  const [isDesktop, setIsDesktop] = useState(true)
+  const [isDesktop, setIsDesktop] = useState(false)
 
   const [printers, setPrinters] = useState<any[]>([])
   const [selectedPrinter, setSelectedPrinter] = useState('')
@@ -52,7 +52,7 @@ export default function PrintView() {
 
       // Filter out virtual printers (PDF, XPS, OneNote, etc.)
       const filtered = printerList.filter((p: any) => {
-        return ['HP LaserJet Pro M404n', 'Canon LBP6030']
+        // return ['HP LaserJet Pro M404n', 'Canon LBP6030']
         const name = p.name.toLowerCase()
         const virtualKeywords = ['pdf', 'xps', 'onenote', 'fax', 'microsoft print', 'send to', 'save as']
         return !virtualKeywords.some(keyword => name.includes(keyword))
@@ -82,9 +82,9 @@ export default function PrintView() {
 
     if (!selectedPrinter) {
       //For development
-      setSelectedPrinter('PDF Test')
+      // setSelectedPrinter('PDF Test')
 
-      // setError('Please select a printer from the list first.')
+      setError('Please select a printer from the list first.')
       return
 
     }
@@ -121,14 +121,14 @@ export default function PrintView() {
       // STEP 2: Send to physical printer
       const templatePath = `/print/template?bcode=${prepData.batchCode}`
       // For development
-      window.open(templatePath, '_blank')
+      // window.open(templatePath, '_blank')
 
-      // const printResult = await window.electronAPI.printSilently({
-      //   url: templatePath,
-      //   deviceName: selectedPrinter
-      // })
+      const printResult = await window.electronAPI.printSilently({
+        url: templatePath,
+        deviceName: selectedPrinter
+      })
 
-      /*if (!printResult.success) {
+      if (!printResult.success) {
         // Print was canceled or failed — rollback reservation
         await fetch('/api/print-batch/confirm', {
           method: 'POST',
@@ -139,7 +139,7 @@ export default function PrintView() {
           ? 'Print was canceled. Reservation rolled back.'
           : (printResult.error || 'Print failed at printer level. Reservation rolled back.')
         )
-      }*/
+      }
 
       // STEP 3: Finalize
       const confirmRes = await fetch('/api/print-batch/confirm', {

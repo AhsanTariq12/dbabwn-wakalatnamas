@@ -116,7 +116,7 @@ export default async function PrintTemplatePage(props: { searchParams: Promise<{
 
                 <div className="h-32 flex flex-col items-start font-bold mt-0 leading-tight" dir="ltr">
                   <div className='whitespace-nowrap text-[16pt] '>DATED:{dateStr}</div>
-                  <div className='whitespace-nowrap text-[16pt] opacity-[0.25] text-gray-500 mb-1'>S.NO#{serial}</div>
+                  <div className='whitespace-nowrap text-[16pt]  text-gray-500 mb-1'>S.NO#{serial}</div>
                   <div className='p-1 border-[1.5px] border-black bg-white'>
                     <QRCode
                       value={`https://dbabwn-wakalatnamas.vercel.app/verify/${encodeURIComponent(serial)}`}
