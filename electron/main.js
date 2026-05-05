@@ -55,11 +55,12 @@ ipcMain.handle('get-printers', async () => {
 
 ipcMain.handle('print-silent', async (event, { url, deviceName }) => {
   return new Promise((resolve) => {
-    // Safety timeout: if anything hangs, resolve after 30 seconds
+    // Safety timeout: Increased to 5 minutes (300,000ms) because batches of 100+ pages 
+    // with heavy SVG/Guilloche patterns take the OS spooler a long time to parse.
     const timeout = setTimeout(() => {
       if (printWindow) printWindow.close();
-      resolve({ success: false, error: 'Print job timed out' });
-    }, 30000);
+      resolve({ success: false, error: 'Print job timed out after 5 minutes' });
+    }, 300000);
 
     let printWindow = new BrowserWindow({
       show: false,
