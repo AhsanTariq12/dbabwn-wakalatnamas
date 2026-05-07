@@ -21,6 +21,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    if (quantity < 1 || quantity > 200) {
+      return NextResponse.json({ error: 'Quantity must be between 1 and 200' }, { status: 400 })
+    }
+
     // 2. Role Verification
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('users')

@@ -220,17 +220,22 @@ export default function PrintView() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300 ml-1">
-                Quantity (Forms)
+              <label className="text-sm font-medium text-gray-300 ml-1 flex justify-between">
+                <span>Quantity (Forms)</span>
+                <span className="text-xs text-blue-400 opacity-90 font-bold">Max: 200 per batch</span>
               </label>
               <input
                 type="number"
                 min="1"
-                max="1000"
+                max="200"
                 required
                 disabled={!isDesktop}
                 value={quantity}
-                onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
+                onChange={(e) => {
+                  let val = parseInt(e.target.value) || 0;
+                  if (val > 200) val = 200;
+                  setQuantity(val);
+                }}
                 className="w-full h-12 px-4 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
               />
             </div>
@@ -293,9 +298,20 @@ export default function PrintView() {
                 }`}
             >
               {loading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>{success ? 'Batch Verified!' : 'Synchronizing Ledger...'}</span>
+                <div className="w-full flex flex-col items-center justify-center space-y-1.5 px-4 h-full relative">
+                  <div className="flex items-center space-x-2 text-sm font-bold z-10">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Processing Print Job... (Can take up to 10 mins)</span>
+                  </div>
+                  <div className="w-full max-w-xs h-1.5 bg-black/30 rounded-full overflow-hidden relative z-10 border border-black/20">
+                    <div className="absolute top-0 bottom-0 bg-gradient-to-r from-blue-300 to-white rounded-full w-[40%]" style={{ animation: 'shimmerBar 1.5s infinite alternate ease-in-out' }}></div>
+                  </div>
+                  <style>{`
+                    @keyframes shimmerBar {
+                      0% { left: 0%; transform: translateX(0); }
+                      100% { left: 100%; transform: translateX(-100%); }
+                    }
+                  `}</style>
                 </div>
               ) : (
                 <>
