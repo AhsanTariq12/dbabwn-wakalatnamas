@@ -85,7 +85,7 @@ export default function LedgerPage() {
         // Directly find batches where the serial number falls within the stored range
         let request = supabase
           .from('batches')
-          .select('*, wakalat_namas(serial_number)')
+          .select('*, wakalat_namas(serial_number), users(name)')
           .eq('status', 'printed')
           .lte('serial_start', serialNum)
           .gte('serial_end', serialNum)
@@ -106,7 +106,7 @@ export default function LedgerPage() {
         // Date Filtering Mode (Standard Pagination)
         let request = supabase
           .from('batches')
-          .select('*, wakalat_namas(serial_number)', { count: 'exact' })
+          .select('*, wakalat_namas(serial_number), users(name)', { count: 'exact' })
           .eq('status', 'printed')
           .order('created_at', { ascending: false })
 
@@ -385,6 +385,14 @@ export default function LedgerPage() {
                           <span className="flex items-center gap-1.5 border border-blue-500/10 px-2 py-0.5 rounded-md bg-blue-500/5 text-blue-400/80">
                             <Loader2 size={12} className={batch.printer_name !== 'Unknown' ? '' : 'animate-pulse'} />
                             {batch.printer_name}
+                          </span>
+                        )}
+                        {batch.users?.name && (
+                          <span className="flex items-center gap-1.5 border border-purple-500/10 px-2 py-0.5 rounded-md bg-purple-500/5 text-purple-400/80" title="Printed By">
+                            <User size={12} />
+                            {batch.users.name.length > 2 
+                              ? batch.users.name.slice(0, -2) + '**' 
+                              : batch.users.name.charAt(0) + '*'}
                           </span>
                         )}
                         <span className="flex items-center gap-1.5"><User size={14} /> {batch.quantity} Forms</span>

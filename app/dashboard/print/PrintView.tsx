@@ -10,6 +10,7 @@ export default function PrintView() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [printRange, setPrintRange] = useState<{start: number, end: number} | null>(null)
 
   // Desktop-specific state
   const [isDesktop, setIsDesktop] = useState(false)
@@ -98,6 +99,7 @@ export default function PrintView() {
     setLoading(true)
     setError('')
     setSuccess('')
+    setPrintRange(null)
 
     try {
       const prepareRes = await fetch('/api/print-batch/prepare', {
@@ -117,6 +119,11 @@ export default function PrintView() {
       }
 
       const prepData = await prepareRes.json()
+      
+      setPrintRange({
+        start: prepData.serialStart,
+        end: prepData.serialEnd
+      })
 
       // STEP 2: Send to physical printer
       const templatePath = `/print/template?bcode=${prepData.batchCode}`
@@ -301,8 +308,13 @@ export default function PrintView() {
                 <div className="w-full flex flex-col items-center justify-center space-y-1.5 px-4 h-full relative">
                   <div className="flex items-center space-x-2 text-sm font-bold z-10">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Processing Print Job... (Can take up to 10 mins)</span>
+                    <span>Processing Job... (Can take up to 10 mins)</span>
                   </div>
+                  {printRange && (
+                    <div className="text-xs font-mono text-blue-300 z-10 bg-black/40 px-2 py-0.5 rounded-md border border-white/5">
+                      Printing Serial: {String(printRange.start).padStart(6, '0')} to {String(printRange.end).padStart(6, '0')}
+                    </div>
+                  )}
                   <div className="w-full max-w-xs h-1.5 bg-black/30 rounded-full overflow-hidden relative z-10 border border-black/20">
                     <div className="absolute top-0 bottom-0 bg-gradient-to-r from-blue-300 to-white rounded-full w-[40%]" style={{ animation: 'shimmerBar 1.5s infinite alternate ease-in-out' }}></div>
                   </div>
