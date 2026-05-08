@@ -45,6 +45,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid printing password' }, { status: 401 })
     }
 
+    // 3.5 Cleanup Dangling Pending Batches
+    // If a previous print failed (e.g. disconnected printer) and the frontend timed out before sending a rollback,
+    // the batch remains 'pending' and traps those serial numbers.
+    // We must roll them back to ensure the serial sequence is not skipped.
+    const { data: pendingBatches } = await supabaseAdmin
+      .from('batches')
+      .select('id')
+      .eq('status', 'pending')
+
+    if (pendingBatches && pendingBatches.length > 0) {
+      for (const b of pendingBatches) {
+        // Delete wakalat_namas first to prevent foreign key errors (if CASCADE is missing)
+        await supabaseAdmin.from('wakalat_namas').delete().eq('batch_id', b.id)
+        // Delete the pending batch
+        await supabaseAdmin.from('batches').delete().eq('id', b.id)
+      }
+      console.log(`Rolled back ${pendingBatches.length} dangling pending batches.`)
+    }
+
     // 4. Reserve a pending batch + serials atomically in DB (RPC)
     const { data: result, error: rpcError } = await supabaseAdmin.rpc('create_print_batch', {
       p_user_id: user.id,
